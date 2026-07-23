@@ -1,0 +1,9 @@
+{
+  "name": "codebase-cartography",
+  "version": "0.1.0",
+  "description": "Skills that crawl a codebase and map it for a new engineer: architecture, dependencies, API surface (created and called), request and data flows, data model, tech stack, config and env, mermaid diagrams, and a getting-started onboarding guide. Writes clear technical docs into docs/codebase-map/.",
+  "author": {
+    "name": "pronoy1004",
+    "url": "https://github.com/pronoy1004"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "codebase-cartography",
+  "description": "Skills that crawl a codebase and map it fast: architecture, dependencies, API surface, flows, data model, tech stack, config, mermaid diagrams, and an onboarding guide.",
+  "owner": {
+    "name": "pronoy1004",
+    "url": "https://github.com/pronoy1004"
+  },
+  "plugins": [
+    {
+      "name": "codebase-cartography",
+      "description": "Crawl a codebase and generate the docs a new engineer needs: architecture, dependencies, APIs created and called, request and data flows, data model, tech stack, config and env, mermaid diagrams, and a getting-started guide.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
