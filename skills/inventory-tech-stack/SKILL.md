@@ -1,6 +1,15 @@
 ---
 name: inventory-tech-stack
-description: Inventory the tech stack of a codebase: languages and versions, frameworks and major libraries, runtimes, package managers, build and test and lint tooling, and CI/CD. Produces docs/codebase-map/tech-stack.md. Use when the user asks about the tech stack, what the project is built with, the frameworks, the tooling, the runtime, or "what languages and tools does this use". Builds on explore-codebase.
+description: >-
+  Inventory the tech stack of a codebase: languages and versions, frameworks and major libraries,
+  runtimes, package managers, build and test and lint tooling, and CI/CD. Produces docs/codebase-
+  map/tech-stack.md. Use when the user asks about the tech stack, what the project is built with,
+  the frameworks, the tooling, the runtime, or "what languages and tools does this use". Builds on
+  explore-codebase.
+license: MIT
+metadata:
+  author: pronoy1004
+  version: "0.2.0"
 ---
 
 # Inventory tech stack
@@ -52,6 +61,14 @@ manifest and the CI or Docker image.
 - Flag version risk. An end-of-life runtime or a Node version in CI that differs from the Dockerfile is a real operational fact worth recording.
 - For a monorepo, note the workspace tool and whether packages share one stack or differ.
 
+## Gotchas
+
+- The CI workflow holds the real build and test commands. The README holds what someone believed a year ago.
+- Version mismatches between the manifest, the CI image, and the Dockerfile are real operational facts. Look for them and write them down.
+- Name only the frameworks that shape how the code is written. The full package list belongs in the dependencies map.
+- An end-of-life runtime is a finding, not a detail to note in passing.
+- In a monorepo the packages may not share one stack. Check before you write a single stack section.
+
 ## Common mistakes to avoid
 
 - Guessing the stack from the folder names instead of reading the manifest.
@@ -59,3 +76,12 @@ manifest and the CI or Docker image.
 - Skipping the CI file, which holds the real build and test commands.
 - Missing a version mismatch between the manifest, the CI image, and the Dockerfile.
 - Reading the README's stated versions without checking the actual config.
+
+## Self-check before returning the document
+
+Run this list before you hand the document back. Fix anything it catches, then run it again.
+
+1. Every fact cites the file it came from.
+2. The build and test commands come from the CI config.
+3. Version mismatches across manifest, CI, and Dockerfile are recorded.
+4. Only the shaping frameworks are named here, with the full list left to the dependencies map.

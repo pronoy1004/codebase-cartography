@@ -1,0 +1,41 @@
+{
+  "skill_name": "map-codebase",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Map this entire codebase for me, it's a Node API at ~/work/billing-api.",
+      "expected_output": "The full pipeline run in order, producing all nine documents plus a stamped index in docs/codebase-map/, pausing between phases.",
+      "assertions": [
+        "docs/codebase-map/ is created in the target repo",
+        "The tech stack is produced before the architecture map",
+        "Flows are traced after the static maps, not before",
+        "Diagrams and the onboarding guide are produced last",
+        "A README.md index is written that links every generated document",
+        "The index is stamped with the commit sha and the date",
+        "The run pauses between phases rather than emitting all nine documents at once"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "document this repo so a new person can understand it",
+      "expected_output": "The full mapping pipeline with the index as the front door.",
+      "assertions": [
+        "Multiple documents are produced under docs/codebase-map/",
+        "An index README.md links all of them",
+        "The onboarding guide is produced and identified as the starting point",
+        "No file outside docs/codebase-map/ is written"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Map the codebase but I only have 20 minutes, don't do the whole thing.",
+      "expected_output": "A reduced run that completes the static maps and the index rather than doing one document perfectly and skipping the rest.",
+      "assertions": [
+        "The response completes the static maps and the index rather than a single deep document",
+        "Flows or diagrams are explicitly deferred rather than silently skipped",
+        "An index README.md is still produced",
+        "The response states what was left out so it can be run later"
+      ]
+    }
+  ]
+}

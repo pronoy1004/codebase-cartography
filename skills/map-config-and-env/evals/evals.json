@@ -1,0 +1,40 @@
+{
+  "skill_name": "map-config-and-env",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Map the config for this service. There's a .env.example with DATABASE_URL, REDIS_URL, STRIPE_SECRET_KEY, LOG_LEVEL, and ENABLE_NEW_CHECKOUT.",
+      "expected_output": "A config-and-env.md table of variable names with required flags, purposes, call sites, and defaults, with no values, plus feature flags and per-environment differences.",
+      "assertions": [
+        "The document is written to docs/codebase-map/config-and-env.md",
+        "All five variables are listed by name",
+        "No column in the table holds a secret value",
+        "Each variable is marked required or optional",
+        "Each variable has a call site showing where the code reads it",
+        "ENABLE_NEW_CHECKOUT is identified as a feature flag",
+        "The .env.example file is linked as the template to copy"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "what env vars do i need to set to run this",
+      "expected_output": "The required variables listed by name with what each is for, and a pointer to the example config file.",
+      "assertions": [
+        "Variables are marked required or optional",
+        "No secret value appears in the output",
+        "The example config file is identified"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Map the config. Heads up, someone committed a real AWS key into config/production.yml.",
+      "expected_output": "A config map that records the committed secret as a finding to rotate, naming the file, without reproducing the key.",
+      "assertions": [
+        "The committed AWS key value is not reproduced anywhere in the output",
+        "The document records that a secret exists in config/production.yml and must be rotated",
+        "The finding is called out clearly rather than buried in a table",
+        "The rest of the config surface is still mapped"
+      ]
+    }
+  ]
+}

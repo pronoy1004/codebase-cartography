@@ -1,0 +1,39 @@
+{
+  "skill_name": "trace-flows",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Trace what happens when a user places an order in this app, from the HTTP request to the response.",
+      "expected_output": "A flow in flows.md with each hop anchored to path:line, covering entry, handler, service, data access, and response, plus error branches and side effects.",
+      "assertions": [
+        "The document is written to docs/codebase-map/flows.md",
+        "Every step is anchored to a path and a line number",
+        "The trace covers entry, handler or controller, service logic, data access, and the response",
+        "Error, validation, or retry branches are recorded",
+        "Any emitted event, queue message, or cache invalidation is noted",
+        "The trigger for the flow is stated"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "walk me through the login flow",
+      "expected_output": "An end-to-end trace of authentication with path:line anchors and the failure branches.",
+      "assertions": [
+        "Every hop is anchored to path:line",
+        "At least one failure path such as bad credentials or a lockout is covered",
+        "The trigger and the final response or side effect are both stated"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Trace every request flow in the app, there are about 60 endpoints.",
+      "expected_output": "A response that narrows to the two to five flows that teach the system rather than tracing all 60.",
+      "assertions": [
+        "The response traces between two and five flows, not all 60",
+        "The chosen flows are justified, for example the primary user action, auth, and a background job",
+        "Each traced flow is anchored to path:line",
+        "The response explains why tracing every endpoint is not useful"
+      ]
+    }
+  ]
+}

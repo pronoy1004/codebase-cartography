@@ -1,0 +1,38 @@
+{
+  "skill_name": "map-dependencies",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Map the dependencies for this Node service. package.json has express, pg, zod, pino, jest, eslint, and typescript.",
+      "expected_output": "A dependencies.md grouping external packages by role with a reason each, separating runtime from dev, and covering the internal module graph with hot spots.",
+      "assertions": [
+        "The document is written to docs/codebase-map/dependencies.md",
+        "External packages are grouped by role such as framework, data, validation, logging, testing, and build",
+        "Each covered package has a one-line reason it is present",
+        "jest, eslint, and typescript are identified as development dependencies rather than runtime",
+        "An internal module graph section is present",
+        "Coupling hot spots or cycles are called out"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "what does this project depend on",
+      "expected_output": "A dependency map covering both external packages and the internal module graph, with versions taken from the lockfile.",
+      "assertions": [
+        "Both external dependencies and an internal module graph are covered",
+        "Versions are sourced from the lockfile rather than the manifest range",
+        "Runtime and development dependencies are separated"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "List the dependencies. Note package.json says ^4.17.0 for express but the lockfile resolved 4.18.2.",
+      "expected_output": "A dependency map that reports the resolved lockfile version as the real one and notes the range separately.",
+      "assertions": [
+        "The document records 4.18.2 as the version that actually installs",
+        "The manifest range ^4.17.0 is noted as the permitted range rather than the installed version",
+        "The document states that lockfile versions are authoritative"
+      ]
+    }
+  ]
+}

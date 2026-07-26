@@ -1,0 +1,39 @@
+{
+  "skill_name": "explore-codebase",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just cloned a Django repo I've never seen at ~/work/orderly and I have no idea where to start. Walk me through getting oriented.",
+      "expected_output": "A crawl that reads pyproject.toml or requirements.txt first, identifies manage.py and the WSGI or ASGI module as entry points, lists the top-level apps with a role each, and follows urls.py rather than listing directories.",
+      "assertions": [
+        "The manifest file is read before any application source file",
+        "manage.py or the wsgi/asgi module is identified as an entry point",
+        "Top-level directories are listed with a one-line role for each",
+        "The response follows the URL configuration or imports rather than only listing folders",
+        "No build, install, or run command is executed against the repo"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "how do i get up to speed on this monorepo fast",
+      "expected_output": "A crawl that maps package boundaries first from the workspace tooling, then treats each package as a smaller crawl, and sizes the job before planning depth.",
+      "assertions": [
+        "The workspace or monorepo tooling file is identified to find package boundaries",
+        "Package boundaries are mapped before any single package is explored in depth",
+        "The response counts or estimates the size of the codebase before planning the crawl",
+        "The response states that repeated patterns will be sampled rather than read exhaustively"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Explore this repo. The README says it's a microservice architecture with a service layer, an API gateway, and event-driven communication.",
+      "expected_output": "A crawl that treats the README as a claim to verify, checking the import graph and the code for real service boundaries and event usage rather than repeating the README.",
+      "assertions": [
+        "The response states that the README claims will be verified against the code",
+        "The verification follows imports or looks for actual queue, event, or HTTP client usage",
+        "Any gap between the README description and the code is recorded as a finding",
+        "Directory names alone are not treated as proof of the described architecture"
+      ]
+    }
+  ]
+}

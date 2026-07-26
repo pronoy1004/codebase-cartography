@@ -1,6 +1,15 @@
 ---
 name: trace-flows
-description: Trace the key flows of a codebase end to end, from entry point through handlers, services, and data, to the response or side effect, anchored to path:line at every hop. Produces docs/codebase-map/flows.md. Use when the user asks how a request works, how a feature flows through the code, the request lifecycle, "walk me through what happens when", or the path of a specific user action. Builds on explore-codebase.
+description: >-
+  Trace the key flows of a codebase end to end, from entry point through handlers, services, and
+  data, to the response or side effect, anchored to path:line at every hop. Produces
+  docs/codebase-map/flows.md. Use when the user asks how a request works, how a feature flows
+  through the code, the request lifecycle, "walk me through what happens when", or the path of a
+  specific user action. Builds on explore-codebase.
+license: MIT
+metadata:
+  author: pronoy1004
+  version: "0.2.0"
 ---
 
 # Trace flows
@@ -51,6 +60,14 @@ Notes: error paths, retries, transactions, and events emitted along the way.
 - Keep each flow to its main line plus the notable branches. A flow with 40 steps is too fine-grained. Group the mechanical hops.
 - Each traced flow is the raw material for a sequence diagram. Hand it to [draw-diagrams](../draw-diagrams/SKILL.md).
 
+## Gotchas
+
+- Run this after the static maps. Tracing a flow before you know the architecture and the data model costs several times more reading.
+- Never infer a step from a function name. Open it. Names lie, especially after a refactor.
+- The error, retry, and transaction branches are half of how the system behaves. A happy-path-only trace misrepresents it.
+- Side effects hide between the obvious steps: an event published, a cache invalidated, an audit row written. Look for them on purpose.
+- A 40-step flow is too fine-grained. Group the mechanical hops down to steps a reader can hold in their head.
+
 ## Common mistakes to avoid
 
 - Tracing every endpoint. Pick the few flows that teach the system.
@@ -58,3 +75,13 @@ Notes: error paths, retries, transactions, and events emitted along the way.
 - Dropping the `path:line` anchors. The value is that a reader can follow along in the code.
 - Ignoring error and retry paths. They are how the system behaves when things go wrong.
 - Missing emitted events and other side effects between the obvious steps.
+
+## Self-check before returning the document
+
+Run this list before you hand the document back. Fix anything it catches, then run it again.
+
+1. Between two and five flows are traced, not every path.
+2. Every hop is anchored to path:line.
+3. Each flow records its error, retry, or transaction branches.
+4. Side effects such as emitted events are noted where they occur.
+5. Each step was read in the code, not inferred from a name.

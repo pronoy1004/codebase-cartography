@@ -1,0 +1,41 @@
+{
+  "skill_name": "draw-diagrams",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Draw the diagrams for this codebase. I've already got architecture.md, flows.md, dependencies.md, and data-model.md in docs/codebase-map/.",
+      "expected_output": "A diagrams.md with a component flowchart, one sequence diagram per traced flow, a module dependency flowchart, and an ER diagram, all in mermaid, all derived from the existing docs.",
+      "assertions": [
+        "The document is written to docs/codebase-map/diagrams.md",
+        "It contains a mermaid flowchart for the components",
+        "It contains a mermaid sequenceDiagram for at least one flow",
+        "It contains a mermaid erDiagram for the data model",
+        "Every edge in the component and dependency diagrams carries a label",
+        "Every diagram has a one-line caption",
+        "The diagrams are built from the existing docs rather than a fresh crawl"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "make me a diagram of how this system fits together",
+      "expected_output": "A mermaid component diagram with labelled edges, a caption, and a node count that stays readable.",
+      "assertions": [
+        "The output is a fenced mermaid block",
+        "Every edge is labelled with a mechanism or an action",
+        "The diagram has 15 or fewer nodes",
+        "A one-line caption accompanies the diagram"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Diagram the architecture. There are 47 services.",
+      "expected_output": "A split set of diagrams: a high-level view plus one per sub-area, rather than one unreadable 47-node diagram.",
+      "assertions": [
+        "The output is split into more than one diagram rather than a single 47-node diagram",
+        "A high-level or grouped overview diagram is present",
+        "No individual diagram exceeds roughly 15 nodes",
+        "The response explains why the diagram was split"
+      ]
+    }
+  ]
+}

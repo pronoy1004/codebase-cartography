@@ -1,6 +1,14 @@
 ---
 name: map-architecture
-description: Map the architecture of a codebase: its components, layers, module boundaries, responsibilities, and how the parts communicate. Produces docs/codebase-map/architecture.md. Use when the user asks for the architecture, the high-level design, the components, or "how is this project structured". Builds on explore-codebase.
+description: >-
+  Map the architecture of a codebase: its components, layers, module boundaries, responsibilities,
+  and how the parts communicate. Produces docs/codebase-map/architecture.md. Use when the user
+  asks for the architecture, the high-level design, the components, or "how is this project
+  structured". Builds on explore-codebase.
+license: MIT
+metadata:
+  author: pronoy1004
+  version: "0.2.0"
 ---
 
 # Map architecture
@@ -57,6 +65,14 @@ Where the design strains: a god module, a circular boundary, a layer that leaks.
 - Asynchronous: message queue, event bus, pub/sub, webhooks.
 - Shared state: a common database, a cache, a shared file store.
 
+## Gotchas
+
+- Directory names are the most common false signal in this job. Follow the import graph from the entry points, because the filesystem shows how someone filed the code, not how it runs.
+- A component whose responsibility you cannot state in one line is a finding, not a hole in your notes. Record the ambiguity.
+- "A talks to B" is half a fact. Without the mechanism, in-process call or HTTP or queue or shared table, the reader cannot reason about failure or latency.
+- Record the boundary violations. The layer rule the code breaks is often the most useful thing a new engineer can learn.
+- A diagram with 40 boxes has stopped being a map. Group the parts and raise the abstraction.
+
 ## Common mistakes to avoid
 
 - Describing the folder tree and calling it architecture. Follow the calls, not the filesystem.
@@ -64,3 +80,13 @@ Where the design strains: a god module, a circular boundary, a layer that leaks.
 - Skipping the communication mechanism. "A talks to B" is half a fact without "how".
 - Hiding the rough edges. The leaks and the god module are the point, not an embarrassment to omit.
 - Boxes with no code anchors. Every component names a path.
+
+## Self-check before returning the document
+
+Run this list before you hand the document back. Fix anything it catches, then run it again.
+
+1. Every component names a responsibility in one line and a path.
+2. Every communication edge names its mechanism.
+3. The layer rules are stated, and any place the code breaks them is recorded.
+4. The component count is small enough to read as a map.
+5. Nothing in the doc is inferred from a directory name alone.

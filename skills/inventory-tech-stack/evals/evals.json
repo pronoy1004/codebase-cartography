@@ -1,0 +1,39 @@
+{
+  "skill_name": "inventory-tech-stack",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Inventory the tech stack. package.json says node 18, the Dockerfile is FROM node:16-alpine, and the GitHub Actions workflow uses node-version 20.",
+      "expected_output": "A tech-stack.md that records the languages, runtime, frameworks, tooling and CI, and flags the three-way Node version mismatch.",
+      "assertions": [
+        "The document is written to docs/codebase-map/tech-stack.md",
+        "The Node version mismatch across the manifest, the Dockerfile, and the CI workflow is flagged explicitly",
+        "All three versions 18, 16, and 20 are named with their sources",
+        "The build and test commands are taken from the CI workflow",
+        "Each fact cites the file it came from"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "what's this built with",
+      "expected_output": "An inventory of languages, runtime, frameworks, package managers, tooling, and CI, each cited to a file.",
+      "assertions": [
+        "Languages and their versions are listed",
+        "The shaping frameworks are named",
+        "Build, test, and lint tooling is listed with the commands",
+        "Each fact cites its source file"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Tech stack for this monorepo. The web package is TypeScript and the ml package is Python.",
+      "expected_output": "An inventory that reports the stack per package rather than flattening the monorepo into one stack.",
+      "assertions": [
+        "The document reports the stack per package rather than as a single unified stack",
+        "Both the TypeScript web package and the Python ml package are covered with their own tooling",
+        "The workspace or monorepo tool is identified",
+        "Each fact cites its source file"
+      ]
+    }
+  ]
+}

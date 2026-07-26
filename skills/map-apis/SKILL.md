@@ -1,6 +1,15 @@
 ---
 name: map-apis
-description: Map the API surface of a codebase in both directions. APIs created: the endpoints, RPC methods, and public interfaces the code exposes. APIs called: the outbound HTTP, third-party SDKs, and database or queue clients the code consumes. Produces docs/codebase-map/apis.md. Use when the user asks about endpoints, routes, the API surface, integrations, or "what does this expose and what does it call". Builds on explore-codebase.
+description: >-
+  Map the API surface of a codebase in both directions. APIs created: the endpoints, RPC methods,
+  and public interfaces the code exposes. APIs called: the outbound HTTP, third-party SDKs, and
+  database or queue clients the code consumes. Produces docs/codebase-map/apis.md. Use when the
+  user asks about endpoints, routes, the API surface, integrations, or "what does this expose and
+  what does it call". Builds on explore-codebase.
+license: MIT
+metadata:
+  author: pronoy1004
+  version: "0.2.0"
 ---
 
 # Map APIs
@@ -50,9 +59,17 @@ versioning is handled, if at all.
 - Split created from called and never blur them. "The endpoints we serve" and "the services we call" are different facts a reader needs kept apart.
 - For each created endpoint, give the method, the path, the handler location, and whether it needs auth. Auth-or-not is one of the first things a new engineer asks.
 - For each outbound call, give the target, the call site, and the purpose. This is the system's runtime dependency list at the request level.
-- Find the route definitions by the framework idiom, not by guessing. See the [crawl checklist](../explore-codebase/references/crawl-checklist.md) for the search terms per framework.
+- Find the route definitions by the framework idiom, not by guessing. See [explore-codebase](../explore-codebase/SKILL.md), which carries the search terms per framework.
 - Prefer the source of truth. If an OpenAPI spec, a proto file, or a GraphQL schema exists, read it, then verify it against the handlers, because specs drift from code.
 - Sample repeated shapes. Fifty CRUD endpoints with the same pattern get the pattern described once plus the table, not fifty prose paragraphs.
+
+## Gotchas
+
+- Created and called answer different questions. Never merge them into one list.
+- An OpenAPI spec, a proto file, or a GraphQL schema is a claim, not the truth. Check it against the handlers, because specs drift from code.
+- Whether an endpoint needs auth is a security-relevant fact. Do not drop the column because filling it in is tedious.
+- Outbound calls hide outside the route table. Grep the client idioms, `fetch`, `axios`, `requests`, `HttpClient`, and SDK imports, or you will miss most of the integrations.
+- Fifty CRUD endpoints that share one shape get a single pattern note and a table, not fifty paragraphs.
 
 ## Common mistakes to avoid
 
@@ -62,3 +79,13 @@ versioning is handled, if at all.
 - Missing outbound calls because you only looked at the route table. Grep the client idioms too.
 - Trusting an OpenAPI spec without checking it against the handlers.
 - Writing a paragraph per endpoint when a table plus one pattern note would do.
+
+## Self-check before returning the document
+
+Run this list before you hand the document back. Fix anything it catches, then run it again.
+
+1. Created and called APIs are in separate sections.
+2. Every created endpoint has a method, a path, a handler location, and an auth note.
+3. Every outbound call has a target, a call site, and a purpose.
+4. Any spec file was checked against the handlers.
+5. Repeated endpoint shapes are covered by one pattern note plus a table.

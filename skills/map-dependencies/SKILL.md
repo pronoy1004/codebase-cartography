@@ -1,6 +1,15 @@
 ---
 name: map-dependencies
-description: Map the dependencies of a codebase in both directions: external packages (from the manifests, with why each one matters) and the internal module dependency graph, including coupling hot spots and cycles. Produces docs/codebase-map/dependencies.md. Use when the user asks about dependencies, third-party packages, the module graph, coupling, or "what does this rely on". Builds on explore-codebase.
+description: >-
+  Map the dependencies of a codebase in both directions: external packages (from the manifests,
+  with why each one matters) and the internal module dependency graph, including coupling hot
+  spots and cycles. Produces docs/codebase-map/dependencies.md. Use when the user asks about
+  dependencies, third-party packages, the module graph, coupling, or "what does this rely on".
+  Builds on explore-codebase.
+license: MIT
+metadata:
+  author: pronoy1004
+  version: "0.2.0"
 ---
 
 # Map dependencies
@@ -48,9 +57,17 @@ package doing something surprising (a small utility with a large footprint).
 
 ## How to find it
 
-- External: the manifest and lockfile per the [crawl checklist](../explore-codebase/references/crawl-checklist.md).
+- External: the manifest and lockfile named in [explore-codebase](../explore-codebase/SKILL.md).
 - Internal: follow `import` / `require` / `use` statements between modules. Grep the import idiom of the language and aggregate by source and target module.
 - Cycles: a module graph that loops (A imports B imports A, directly or through a chain). Note each cycle and the files that close it.
+
+## Gotchas
+
+- Read the lockfile for what actually installs. The manifest range tells you what is allowed, not what is there.
+- Do not annotate transitive packages. Cover the direct dependencies that shape the code, grouped by role.
+- The internal module graph is where a code change actually lands. A dependency doc that stops at third-party packages answers the less useful half of the question.
+- Import cycles and the module that 30 files import are the highest-value facts here. They explain why a small change breaks something far away.
+- Keep dev and runtime dependencies separated. A newcomer needs to know what ships to production.
 
 ## Common mistakes to avoid
 
@@ -59,3 +76,13 @@ package doing something surprising (a small utility with a large footprint).
 - Ignoring cycles and hot spots. They are the reason a "small" change breaks something far away.
 - Trusting the manifest version range over the lockfile's resolved version.
 - Mixing dev and runtime dependencies into one undifferentiated list.
+
+## Self-check before returning the document
+
+Run this list before you hand the document back. Fix anything it catches, then run it again.
+
+1. External dependencies are grouped by role, each with a reason.
+2. Runtime and development dependencies are separated.
+3. The internal module graph is present, not just the package list.
+4. Cycles and high-fan-in modules are called out explicitly.
+5. Versions come from the lockfile.

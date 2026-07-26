@@ -1,0 +1,40 @@
+{
+  "skill_name": "write-onboarding-guide",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write the onboarding guide for this repo. The other codebase-map docs are already done.",
+      "expected_output": "An onboarding.md leading with what the system does, then run-it-locally, tests, five ordered first files, a where-to-look table, a glossary, and links to the other maps.",
+      "assertions": [
+        "The document is written to docs/codebase-map/onboarding.md",
+        "The run-it-locally section appears near the top, before any architecture discussion",
+        "Exactly five first files are listed, in order, each with a reason",
+        "A glossary of domain and internal terms is present",
+        "The guide links to the other codebase-map documents rather than repeating them",
+        "No secret value appears in the run steps"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "new dev starts monday, write them a getting started doc for this codebase",
+      "expected_output": "A getting-started guide with install, run, test, first files, and a glossary.",
+      "assertions": [
+        "Install, run, and test commands are all given",
+        "A list of files to read first is included with reasons",
+        "A glossary is present",
+        "Commands are verified against the project's own scripts"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write the onboarding guide. The README says to run `npm start` but package.json only has a `dev` and a `build` script.",
+      "expected_output": "A guide that uses npm run dev, the command that actually exists, and flags the stale README instruction.",
+      "assertions": [
+        "The run instruction uses npm run dev rather than npm start",
+        "The mismatch with the README is flagged",
+        "The commands given match the scripts present in package.json",
+        "The response states that manifest scripts outrank the README"
+      ]
+    }
+  ]
+}

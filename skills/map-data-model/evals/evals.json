@@ -1,0 +1,40 @@
+{
+  "skill_name": "map-data-model",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Map the data model. It's a Rails app with users, orders, order_items, and products, and there are migrations in db/migrate.",
+      "expected_output": "A data-model.md with an entity block per table, key fields, cardinality on each relationship, an ER mermaid diagram, and access patterns.",
+      "assertions": [
+        "The document is written to docs/codebase-map/data-model.md",
+        "Each of users, orders, order_items, and products has an entity block with a purpose line and a source path",
+        "Every relationship states its cardinality",
+        "A mermaid erDiagram block is included",
+        "An access patterns section says where core entities are created, read, updated, and deleted",
+        "The migrations directory is identified as the source of the real schema"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "what's the db schema look like",
+      "expected_output": "A data model covering entities, key fields, relationships with cardinality, and an ER diagram.",
+      "assertions": [
+        "Entities are listed with their key fields",
+        "Relationships include cardinality",
+        "An ER diagram is included",
+        "The document does not list every column of every table"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Map the data model, we use MongoDB so there's no schema.",
+      "expected_output": "A data model that documents the implied model of the document store rather than reporting that none exists.",
+      "assertions": [
+        "The document records the document shapes for the main collections",
+        "Key patterns or identifier conventions are documented",
+        "Relationships between collections are described with cardinality",
+        "The response states that a document store still has an implied model"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "skill_name": "map-apis",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Map the APIs in this FastAPI service. It exposes /users, /orders, and /health, calls Stripe for payments, and reads from Postgres and Redis.",
+      "expected_output": "An apis.md with created endpoints in a table carrying method, path, handler location and auth, and a separate called section listing Stripe, Postgres, and Redis with call sites.",
+      "assertions": [
+        "The document is written to docs/codebase-map/apis.md",
+        "APIs created and APIs called are in separate sections",
+        "The created table includes a method, a path, a handler location, and an auth column for each endpoint",
+        "Stripe is listed under outbound services with a call site and a purpose",
+        "Postgres and Redis are listed as data or messaging clients",
+        "The /health endpoint is documented alongside the others"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "what endpoints does this thing have",
+      "expected_output": "A listing of created endpoints with handler locations and auth, plus the outbound calls the service makes.",
+      "assertions": [
+        "Endpoints are listed with their handler locations",
+        "Whether each endpoint requires auth is stated",
+        "Outbound calls are covered in addition to the endpoints"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Map the API surface. We have an openapi.yaml checked in, just use that.",
+      "expected_output": "An API map that reads the spec but verifies it against the handlers, reporting any drift between the two.",
+      "assertions": [
+        "The spec is read as the starting point",
+        "The spec is checked against the actual route handlers in the code",
+        "Any endpoint present in the spec but not the code, or in the code but not the spec, is reported as drift",
+        "Outbound calls are still mapped, since the spec does not cover them"
+      ]
+    }
+  ]
+}

@@ -1,6 +1,16 @@
 ---
 name: explore-codebase
-description: The method for crawling an unfamiliar codebase fast and completely. Read the build manifests first, find the entry points, follow the graph from there, and sample representative files instead of reading everything. Use Explore subagents in parallel for breadth. Every other codebase-cartography skill builds on this. Use when the user wants to understand, map, document, or onboard onto a codebase, or asks how to explore a repo you do not know yet.
+description: >-
+  The method for crawling an unfamiliar codebase fast and completely. Read the build manifests
+  first, find the entry points, follow the graph from there, and sample representative files
+  instead of reading everything. Use Explore subagents in parallel for breadth. Every other
+  codebase-cartography skill builds on this. Use when the user wants to understand, map, document,
+  or onboard onto a codebase, or asks how to explore a repo you do not know yet.
+license: MIT
+compatibility: Requires file-read and search tools over a local repository checkout.
+metadata:
+  author: pronoy1004
+  version: "0.2.0"
 ---
 
 # Explore codebase
@@ -9,7 +19,7 @@ This is the crawl method the rest of the plugin builds on. The goal is a correct
 
 Apply the `writing-skills` plugin's `writing-style` and `write-tech-doc` skills to any notes you write. If that plugin is not installed, keep the prose plain: short sentences, active voice, no em dashes.
 
-Per-language manifest and entry-point cheatsheet: [references/crawl-checklist.md](references/crawl-checklist.md).
+Read [references/crawl-checklist.md](references/crawl-checklist.md) before phase 1 whenever the codebase uses a stack you have not mapped yet, or when you cannot find the manifest, the entry points, or the route definitions for a framework.
 
 ## The method
 
@@ -48,6 +58,14 @@ All generated docs go in `docs/codebase-map/` inside the target repo. One file p
 - Never print secret values. When you find a config key or a `.env` reference, record the name, never the value.
 - Do not edit source. The only writes are the markdown files under `docs/codebase-map/`.
 
+## Gotchas
+
+- A folder named `services` or `models` is a hint, not proof. Confirm it by following imports before you record it as a layer.
+- Maintainer docs drift. Read the README for intent, then verify every claim against the code before you repeat it in a map.
+- The lockfile tells you the version that actually installs. The manifest range only tells you what is permitted.
+- Explore subagents return excerpts, not whole files. Use them to locate things, then read the key files yourself before you document them.
+- Counting files by language before you plan changes the plan. A 5,000-file monorepo needs package boundaries first. A 40-file library does not.
+
 ## Common mistakes to avoid
 
 - Reading source files before reading the manifests. You will not know what you are looking at.
@@ -56,3 +74,13 @@ All generated docs go in `docs/codebase-map/` inside the target repo. One file p
 - Documenting one area in perfect detail and never mapping the rest. Breadth first, then depth.
 - Running the build or the app to "see what it does." Read it. Execute only on request.
 - Copying a secret value into a doc. Names only.
+
+## Self-check before returning the document
+
+Run this list before you hand the document back. Fix anything it catches, then run it again.
+
+1. The manifests and entry points were read before any source file.
+2. Every claim taken from a README was verified against the code.
+3. Repeated patterns were sampled, not read in full.
+4. No command was executed against the target repo.
+5. No secret value was copied into the notes.

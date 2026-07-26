@@ -14,6 +14,16 @@ npx skills@latest add pronoy1004/codebase-cartography
 
 The generated docs read best with the [writing-skills](https://github.com/pronoy1004/writing-skills) plugin installed, which supplies the `writing-style` and `write-tech-doc` prose layers these skills apply. It is optional. Without it the skills fall back to plain, human prose.
 
+### Any other agent
+
+These are plain [Agent Skills](https://agentskills.io), so they work in any compatible client (Cursor, GitHub Copilot, Codex, Gemini CLI, OpenCode, Goose, and the rest). Copy the skills into the `.agents/skills/` directory that clients scan:
+
+```bash
+git clone https://github.com/pronoy1004/codebase-cartography && cp -r codebase-cartography/skills/* ~/.agents/skills/
+```
+
+Use `~/.agents/skills/` to make them available everywhere, or `<project>/.agents/skills/` to scope them to one repo.
+
 ## Use
 
 Point the entry-point skill at a repo:
@@ -63,6 +73,18 @@ docs/codebase-map/
 ```
 
 The skills read and document only. They never run the code, and they never print a secret value, only its name.
+
+## Spec conformance
+
+Every skill here follows the [Agent Skills specification](https://agentskills.io/specification): a `SKILL.md` per directory with `name` and `description` frontmatter, reference material split into `references/` and loaded only when the instructions call for it, and test cases in `evals/evals.json`.
+
+Check the whole repo against the spec:
+
+```bash
+python3 validate.py
+```
+
+It validates the name rules and directory match, the 1024-character description limit, the 500-line body limit, `metadata` typing, relative links that resolve, reference links that state when to load them, and the eval file schema.
 
 ## Why
 

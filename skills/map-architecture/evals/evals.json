@@ -1,0 +1,40 @@
+{
+  "skill_name": "map-architecture",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Map the architecture of this Express API. It has routes/, controllers/, services/, repositories/, and a shared/ folder.",
+      "expected_output": "An architecture.md with components carrying one-line responsibilities and paths, the layer rule stated, the communication mechanisms named, and any layer violations recorded.",
+      "assertions": [
+        "The document is written to docs/codebase-map/architecture.md",
+        "Each component has a one-line responsibility and a path",
+        "The layer boundaries and the rule for what each layer may call are stated",
+        "Communication mechanisms are named for each pair of components that interact",
+        "Any place the code breaks the stated layer rule is recorded",
+        "The structure is derived from imports, not only from the folder names"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "what's the architecture here",
+      "expected_output": "An architecture map covering components, layers, communication, cross-cutting concerns, and rough edges, anchored to real paths.",
+      "assertions": [
+        "The document includes Components, Layers, and a communication section",
+        "Every component names a path",
+        "Cross-cutting concerns such as auth, logging, or error handling are located",
+        "A risks or rough edges section is present"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Document the architecture. It's a single 8000-line main.py, that's the whole app.",
+      "expected_output": "An architecture map that finds the internal structure within one file rather than reporting that there is no architecture.",
+      "assertions": [
+        "The document identifies internal components or responsibility groupings within the single file",
+        "Components are anchored to line ranges or function and class names",
+        "The absence of enforced module boundaries is recorded as a finding rather than as an absence of architecture",
+        "A risks or rough edges section notes the coupling implied by the single-file structure"
+      ]
+    }
+  ]
+}
