@@ -32,6 +32,59 @@ Point the entry-point skill at a repo:
 
 It runs the whole pipeline and pauses between steps. Or invoke a single skill on its own, for example "map the architecture" or "trace the main request flow".
 
+## Agent service
+
+The skills above pause between phases so you can skip one. If you want the same pipeline
+callable from your own UI, a script, or CI, this repo also ships an agent service in
+[agents/codebase-cartographer](agents/codebase-cartographer). It runs the same skills
+through the [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk), runs every phase
+without pausing, and returns the generated docs in the response.
+
+```bash
+pip install -e agents/codebase-cartographer
+export AGENT_API_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export ANTHROPIC_API_KEY=sk-ant-...
+cd agents/codebase-cartographer && uvicorn main:app --port 8002
+```
+
+Point it at a git URL, or at a local path if you allow one:
+
+```bash
+curl -X POST localhost:8002/runs -H "X-API-Key: $AGENT_API_KEY" \
+  -H 'content-type: application/json' \
+  -d '{"repo":{"type":"git","url":"https://github.com/owner/repo","ref":"main"}}'
+```
+
+`GET /runs/{id}/events` streams progress, `GET /runs/{id}` returns every generated doc as
+text, and `GET /runs/{id}/artifact` returns them as a tarball. Runs take minutes, so nothing
+blocks.
+
+### Sandboxing
+
+The service clones a repository you gave it and runs a model with `Bash` inside that
+checkout, which is remote code execution by design. Two layers guard it, and you need both.
+
+The agent turns on the SDK's bash sandbox in code, with network access off and no way for a
+command to opt back out. That holds even when you run the service straight from a terminal,
+so the protection does not depend on anyone reading this section. It confines bash on macOS
+and Linux; it does not confine the whole process.
+
+The container is the other layer, and it is a deployment requirement rather than a
+suggestion. The included Dockerfile runs as a non-root user and installs git and the CLI it
+needs. Give it no host mounts, and limit egress to the git host you clone from.
+
+Local paths are refused unless `ALLOWED_REPO_ROOTS` names the directories the service may
+read. Left unset, only git URLs work, which is the right default in a container. Setting it
+to `/` hands the agent your whole filesystem.
+
+The agent also treats everything in the mapped repository as untrusted data. If a file
+contains text addressed to the agent, it does not act on it; it quotes it back in
+`injection_notices` on the result.
+
+The HTTP surface, streaming, and auth come from
+[agent-runtime](https://github.com/pronoy1004/agent-runtime). The skills are not modified:
+the service loads this repo as a plugin exactly as it sits.
+
 ## Skills
 
 ### The engine

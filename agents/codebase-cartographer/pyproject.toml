@@ -1,0 +1,8 @@
+[project]
+name = "codebase-cartographer"
+version = "0.1.0"
+description = "HTTP agent that crawls a repository and writes the full codebase map"
+requires-python = ">=3.11"
+dependencies = [
+    "agent-runtime @ git+https://github.com/pronoy1004/agent-runtime",
+]
