@@ -36,19 +36,31 @@ It runs the whole pipeline and pauses between steps. Or invoke a single skill on
 
 The skills above pause between phases so you can skip one. If you want the same pipeline
 callable from your own UI, a script, or CI, this repo also ships an agent service in
-[agents/codebase-cartographer](agents/codebase-cartographer). It runs on the
-[Gemini API](https://ai.google.dev/gemini-api/docs), runs every phase without pausing, and
-returns the generated docs in the response.
+[agents/codebase-cartographer](agents/codebase-cartographer). It runs every phase without
+pausing and returns the generated docs in the response.
 
-Gemini has a genuinely free API tier, so this is the fastest way to try the service without
-a paid key. Get one at [aistudio.google.com](https://aistudio.google.com/apikey).
+The service runs on whatever LLM provider you already have a key for — Anthropic, OpenAI,
+Gemini, or anything else [litellm](https://docs.litellm.ai/) supports — via
+[agent-runtime](https://github.com/pronoy1004/agent-runtime). Gemini has a genuinely free
+API tier, so it's the fastest way to try the service without a paid key:
+[aistudio.google.com](https://aistudio.google.com/apikey).
 
 ```bash
 pip install "agent-runtime @ git+https://github.com/pronoy1004/agent-runtime" uvicorn
 export AGENT_API_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
-export GEMINI_API_KEY=...
+export GEMINI_API_KEY=...  # or ANTHROPIC_API_KEY / OPENAI_API_KEY, matched to AGENT_MODEL
 cd agents/codebase-cartographer && uvicorn main:app --port 8002
 ```
+
+### UI
+
+Open `http://localhost:8002/` for a small built-in page: point it at a git URL or local
+path, watch the exploration tool calls stream in, then browse the generated docs by
+filename and download the whole map as a tarball.
+
+![codebase-cartographer UI](agents/codebase-cartographer/ui/screenshots/ui.png)
+
+### API
 
 Point it at a git URL, or at a local path if you allow one:
 
@@ -62,7 +74,7 @@ curl -X POST localhost:8002/runs -H "X-API-Key: $AGENT_API_KEY" \
 text, and `GET /runs/{id}/artifact` returns them as a tarball. Runs take minutes, so nothing
 blocks.
 
-Gemini has no plugin/skill-loading mechanism the way Claude Code does, and no
+There's no plugin/skill-loading mechanism outside Claude Code, and no
 Read/Grep/Glob/Bash/Write tool set to reuse. The service reads each skill's `SKILL.md` and
 folds it into the system prompt instead of loading it as a live plugin, and it hands the
 model four hand-written functions in `agents/codebase-cartographer/tools.py`: `glob_files`,
@@ -93,8 +105,8 @@ to `/` hands the agent your whole filesystem.
 
 The agent also treats everything in the mapped repository as untrusted data. If a file
 contains text addressed to the agent, it does not act on it; it quotes it back in
-`injection_notices` on the result. Set `GEMINI_MODEL` to use something other than the
-default `gemini-2.5-flash`.
+`injection_notices` on the result. Set `AGENT_MODEL` to a `provider/model` string (e.g.
+`anthropic/claude-sonnet-5`) to use something other than the Gemini default.
 
 The HTTP surface, streaming, and auth come from
 [agent-runtime](https://github.com/pronoy1004/agent-runtime). The skills are not modified:
