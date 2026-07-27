@@ -44,7 +44,7 @@ Gemini has a genuinely free API tier, so this is the fastest way to try the serv
 a paid key. Get one at [aistudio.google.com](https://aistudio.google.com/apikey).
 
 ```bash
-pip install -e agents/codebase-cartographer
+pip install "agent-runtime @ git+https://github.com/pronoy1004/agent-runtime" uvicorn
 export AGENT_API_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
 export GEMINI_API_KEY=...
 cd agents/codebase-cartographer && uvicorn main:app --port 8002
