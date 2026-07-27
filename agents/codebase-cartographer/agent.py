@@ -4,17 +4,18 @@ The interactive `map-codebase` skill pauses between phases so the user can skip 
 service has nobody to ask, so this agent runs every phase in order without pausing and
 returns the generated docs in the response.
 
-Runs on Gemini rather than Claude. Two consequences:
+Runs on whatever model `AGENT_MODEL` names (via litellm — any provider the caller has a
+key for, defaulting to Gemini), not the Claude Code CLI. Two consequences:
 
-- There is no Claude Code plugin/skill-loading mechanism on Gemini, so the skill
-  instructions are read from disk and folded into the system prompt (see `agent_runtime.
-  load_skills`). The skill files themselves are not modified.
-- Gemini does not accept `tools` and a response schema in the same call, and there is no
-  Read/Grep/Glob/Bash/Write tool set to reuse. The run is two calls: an exploration call
-  with the hand-rolled tools in `tools.py` (no shell, no subprocess — see that file for
-  why), then a schema-constrained call that asks for the structured summary. `RunPlan`
-  in agent-runtime drives this automatically whenever both `tools` and `response_schema`
-  are set.
+- There is no Claude Code plugin/skill-loading mechanism outside Claude Code, so the
+  skill instructions are read from disk and folded into the system prompt (see
+  `agent_runtime.load_skills`). The skill files themselves are not modified.
+- There is no Read/Grep/Glob/Bash/Write tool set to reuse, and mixing free tool calls
+  with a schema-constrained response is unreliable across providers. The run is two
+  calls: an exploration call with the hand-rolled tools in `tools.py` (no shell, no
+  subprocess — see that file for why), then a schema-constrained call that asks for the
+  structured summary. `RunPlan` in agent-runtime drives this automatically whenever both
+  `tools` and `response_schema` are set.
 """
 
 from __future__ import annotations
@@ -26,7 +27,7 @@ from typing import Annotated, Any, Literal
 from agent_runtime import AgentSpec, RunOutcome, RunPlan, load_skills
 from agent_runtime.spec import DEFAULT_MODEL
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 import checkout
@@ -34,8 +35,9 @@ from tools import make_tools
 
 # agents/codebase-cartographer/agent.py -> repo root -> skills/
 SKILLS_ROOT = Path(__file__).resolve().parents[2] / "skills"
-MODEL = os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
+MODEL = os.environ.get("AGENT_MODEL", DEFAULT_MODEL)
 DOCS_DIR = "docs/codebase-map"
+UI_INDEX = Path(__file__).resolve().parent / "ui" / "index.html"
 
 
 class GitSource(BaseModel):
@@ -217,7 +219,13 @@ def _tarball(docs: dict[str, str]) -> bytes:
 
 
 def extra_routes(app: FastAPI) -> None:
-    """Serve the map as a tarball, for callers that want files rather than JSON."""
+    """Serve the hand-built UI and the map as a tarball for callers that want files."""
+
+    @app.get("/")
+    async def ui() -> FileResponse:
+        # Static markup with no data in it, so it skips the X-API-Key guard the same
+        # way /healthz does — the key goes in from the browser.
+        return FileResponse(UI_INDEX)
 
     @app.get("/runs/{run_id}/artifact", dependencies=[app.state.guard])
     async def artifact(run_id: str) -> Response:

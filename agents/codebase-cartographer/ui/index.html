@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>codebase-cartographer</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfbfa;
+    --surface: #ffffff;
+    --border: #e4e2de;
+    --text: #1c1b19;
+    --text-dim: #6b675f;
+    --accent: #2e6b4f;
+    --accent-ink: #ffffff;
+    --danger: #b3261e;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --surface: #1b1e23;
+      --border: #333740;
+      --text: #e9ebee;
+      --text-dim: #9a9fa8;
+      --accent: #5fbb90;
+      --accent-ink: #0b1a13;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .shell { max-width: 900px; margin: 0 auto; padding: 40px 20px 100px; }
+  h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; }
+  .sub { color: var(--text-dim); font-size: 1rem; margin: 0 0 28px; }
+
+  details.settings {
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+  details.settings summary { cursor: pointer; padding: 10px 14px; font-size: 0.85rem; color: var(--text-dim); user-select: none; }
+  .settings-body { padding: 0 14px 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .settings-body input { flex: 1; min-width: 160px; }
+
+  fieldset { border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 0 0 16px; background: var(--surface); }
+  legend { padding: 0 6px; font-size: 0.8rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  label { display: block; font-size: 0.85rem; color: var(--text-dim); margin: 12px 0 5px; }
+  label:first-of-type { margin-top: 0; }
+  input, select { width: 100%; font: inherit; font-size: 0.95rem; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .radio-row { display: flex; gap: 16px; margin-bottom: 10px; }
+  .radio-row label { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 0.9rem; color: var(--text); }
+  .radio-row input { width: auto; }
+  .source-fields.hidden { display: none; }
+
+  button {
+    font: inherit; font-weight: 600; font-size: 0.95rem; padding: 10px 20px; border-radius: 9px; border: none;
+    background: var(--accent); color: var(--accent-ink); cursor: pointer;
+    transition: transform 110ms var(--ease-out), opacity 110ms var(--ease-out);
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.5; cursor: default; transform: none; }
+  @media (hover: hover) and (pointer: fine) { button:hover:not(:disabled) { opacity: 0.92; } }
+
+  .progress {
+    margin-top: 22px; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    background: var(--surface); font-size: 0.85rem; font-family: ui-monospace, "SF Mono", monospace;
+    max-height: 260px; overflow-y: auto; display: none;
+  }
+  .progress.visible { display: block; }
+  .ev { padding: 2px 0; color: var(--text-dim); }
+  .ev.text { color: var(--text); white-space: pre-wrap; font-family: -apple-system, sans-serif; }
+  .ev.error { color: var(--danger); }
+
+  .result { margin-top: 28px; opacity: 0; transform: translateY(6px); }
+  .result.visible { animation: reveal 240ms var(--ease-out) forwards; }
+  @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) {
+    .result.visible { animation: none; opacity: 1; transform: none; }
+    button { transition: none; }
+  }
+
+  .section { margin-bottom: 26px; }
+  .section h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin: 0 0 10px; font-weight: 650; }
+  .summary { font-size: 1.1rem; }
+
+  .warn { border: 1px solid var(--danger); border-radius: 10px; padding: 10px 14px; color: var(--danger); font-size: 0.88rem; margin-bottom: 16px; }
+
+  .doc-layout { display: flex; gap: 20px; align-items: flex-start; }
+  .doc-tree { flex: 0 0 220px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); overflow: hidden; }
+  .doc-tree button {
+    display: block; width: 100%; text-align: left; background: none; color: var(--text);
+    font-weight: 400; font-size: 0.85rem; padding: 9px 12px; border-radius: 0; border-bottom: 1px solid var(--border);
+  }
+  .doc-tree button:last-child { border-bottom: none; }
+  .doc-tree button:active { transform: none; }
+  .doc-tree button.active { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  .doc-view {
+    flex: 1; min-width: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+    padding: 18px 22px; max-height: 560px; overflow-y: auto;
+  }
+  .doc-view h1, .doc-view h2, .doc-view h3 { margin-top: 1.2em; }
+  .doc-view h1:first-child, .doc-view h2:first-child, .doc-view h3:first-child { margin-top: 0; }
+  .doc-view pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; overflow-x: auto; font-size: 0.82rem; }
+  .doc-view code { font-family: ui-monospace, "SF Mono", monospace; font-size: 0.85em; }
+  .doc-view p code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+
+  .skipped-item { padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .skipped-item:last-child { border-bottom: none; }
+  .skipped-item b { color: var(--text); }
+
+  .artifact-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1>codebase-cartographer</h1>
+  <p class="sub">Point it at a repo, get back the full codebase map.</p>
+
+  <details class="settings">
+    <summary>Connection</summary>
+    <div class="settings-body">
+      <input id="baseUrl" placeholder="Base URL (defaults to this origin)">
+      <input id="apiKey" type="password" placeholder="X-API-Key">
+    </div>
+  </details>
+
+  <form id="form">
+    <fieldset>
+      <legend>Repository</legend>
+      <div class="radio-row">
+        <label><input type="radio" name="srcType" value="git" checked> Git URL</label>
+        <label><input type="radio" name="srcType" value="path"> Local path</label>
+      </div>
+      <div class="source-fields" id="gitFields">
+        <label for="repoUrl">Repository URL</label>
+        <input id="repoUrl" placeholder="https://github.com/org/repo">
+        <label for="repoRef">Ref (optional)</label>
+        <input id="repoRef" placeholder="branch or tag">
+      </div>
+      <div class="source-fields hidden" id="pathFields">
+        <label for="repoPath">Path on the service host</label>
+        <input id="repoPath" placeholder="/repos/my-project">
+      </div>
+      <label for="pkg">Package (optional, for a monorepo)</label>
+      <input id="pkg">
+      <label for="flows">Flows to trace (comma-separated, optional)</label>
+      <input id="flows">
+    </fieldset>
+
+    <button type="submit" id="submitBtn">Map the repository</button>
+  </form>
+
+  <div class="progress" id="progress"></div>
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function creds() {
+  const baseUrl = $('baseUrl').value.trim() || window.location.origin;
+  const apiKey = $('apiKey').value.trim();
+  return { baseUrl: baseUrl.replace(/\/$/, ''), apiKey };
+}
+
+for (const id of ['baseUrl', 'apiKey']) {
+  const saved = localStorage.getItem('cc.' + id);
+  if (saved) $(id).value = saved;
+  $(id).addEventListener('change', () => localStorage.setItem('cc.' + id, $(id).value));
+}
+
+document.querySelectorAll('input[name="srcType"]').forEach(r => {
+  r.addEventListener('change', () => {
+    $('gitFields').classList.toggle('hidden', r.value !== 'git' || !r.checked);
+    $('pathFields').classList.toggle('hidden', r.value !== 'path' || !r.checked);
+  });
+});
+
+async function* sseEvents(url, headers) {
+  const res = await fetch(url, { headers });
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) return;
+    buf += decoder.decode(value, { stream: true });
+    let idx;
+    while ((idx = buf.indexOf('\n\n')) !== -1) {
+      const chunk = buf.slice(0, idx);
+      buf = buf.slice(idx + 2);
+      let event = 'message', data = '';
+      for (const line of chunk.split('\n')) {
+        if (line.startsWith('event:')) event = line.slice(6).trim();
+        else if (line.startsWith('data:')) data += line.slice(5).trim();
+      }
+      if (data) yield { event, data: JSON.parse(data) };
+    }
+  }
+}
+
+function addEvent(kind, text) {
+  const el = document.createElement('div');
+  el.className = 'ev ' + kind;
+  el.textContent = text;
+  $('progress').appendChild(el);
+  $('progress').scrollTop = $('progress').scrollHeight;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Deliberately minimal: headings, fenced code, inline code and bold. Good enough for the
+// generated docs without pulling in a markdown library for a handful of tags.
+function renderMarkdown(md) {
+  const lines = md.split('\n');
+  let html = '', inCode = false;
+  for (const line of lines) {
+    if (line.startsWith('```')) { inCode = !inCode; html += inCode ? '<pre><code>' : '</code></pre>'; continue; }
+    if (inCode) { html += escapeHtml(line) + '\n'; continue; }
+    const h = line.match(/^(#{1,3})\s+(.*)$/);
+    if (h) { const lvl = h[1].length; html += `<h${lvl}>${escapeHtml(h[2])}</h${lvl}>`; continue; }
+    if (!line.trim()) { html += '<br>'; continue; }
+    let escaped = escapeHtml(line)
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+    html += `<p>${escaped}</p>`;
+  }
+  return html;
+}
+
+function renderResult(r) {
+  const root = $('result');
+  root.innerHTML = '';
+
+  const summary = document.createElement('div');
+  summary.className = 'section';
+  summary.innerHTML = `<h2>Summary</h2><p class="summary">${escapeHtml(r.summary || '')} <span style="color:var(--text-dim);font-size:0.85rem">(commit ${(r.commit || '').slice(0, 10)})</span></p>`;
+  root.appendChild(summary);
+
+  if (r.injection_notices && r.injection_notices.length) {
+    const w = document.createElement('div');
+    w.className = 'warn';
+    w.innerHTML = '<b>Instructions found in repo content (ignored):</b><br>' + r.injection_notices.map(escapeHtml).join('<br>');
+    root.appendChild(w);
+  }
+
+  if (r.skipped && r.skipped.length) {
+    const s = document.createElement('div');
+    s.className = 'section';
+    s.innerHTML = '<h2>Skipped</h2>' + r.skipped.map(sk => `<div class="skipped-item"><b>${escapeHtml(sk.phase)}</b> — ${escapeHtml(sk.reason)}</div>`).join('');
+    root.appendChild(s);
+  }
+
+  const docs = r.docs || {};
+  const paths = Object.keys(docs).sort();
+  if (paths.length) {
+    const section = document.createElement('div');
+    section.className = 'section';
+    section.innerHTML = '<h2>Codebase map</h2>';
+    const layout = document.createElement('div');
+    layout.className = 'doc-layout';
+    const tree = document.createElement('div');
+    tree.className = 'doc-tree';
+    const view = document.createElement('div');
+    view.className = 'doc-view';
+
+    function show(path, btn) {
+      view.innerHTML = renderMarkdown(docs[path]);
+      tree.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    paths.forEach((path, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = path.split('/').pop();
+      btn.title = path;
+      btn.addEventListener('click', () => show(path, btn));
+      tree.appendChild(btn);
+      if (i === 0) show(path, btn);
+    });
+
+    layout.appendChild(tree);
+    layout.appendChild(view);
+    section.appendChild(layout);
+    root.appendChild(section);
+  }
+
+  root.classList.remove('visible');
+  void root.offsetWidth;
+  root.classList.add('visible');
+}
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const { baseUrl, apiKey } = creds();
+  const headers = { 'content-type': 'application/json', 'X-API-Key': apiKey };
+
+  $('submitBtn').disabled = true;
+  $('progress').classList.add('visible');
+  $('progress').innerHTML = '';
+  $('result').innerHTML = '';
+  $('result').classList.remove('visible');
+
+  const srcType = document.querySelector('input[name="srcType"]:checked').value;
+  const repo = srcType === 'git'
+    ? { type: 'git', url: $('repoUrl').value, ref: $('repoRef').value || null }
+    : { type: 'path', path: $('repoPath').value };
+  const payload = {
+    repo,
+    package: $('pkg').value || null,
+    flows: $('flows').value ? $('flows').value.split(',').map(s => s.trim()).filter(Boolean) : null,
+  };
+
+  try {
+    const started = await fetch(baseUrl + '/runs', { method: 'POST', headers, body: JSON.stringify(payload) });
+    if (!started.ok) throw new Error(`${started.status}: ${await started.text()}`);
+    const { run_id } = await started.json();
+
+    for await (const { event, data } of sseEvents(`${baseUrl}/runs/${run_id}/events`, headers)) {
+      if (event === 'done') {
+        if (data.status === 'done') {
+          renderResult(data.result);
+          const dl = document.createElement('button');
+          dl.type = 'button';
+          dl.className = 'artifact-btn';
+          dl.textContent = 'Download tarball';
+          dl.style.marginTop = '4px';
+          dl.addEventListener('click', async () => {
+            const res = await fetch(`${baseUrl}/runs/${run_id}/artifact`, { headers });
+            const blob = await res.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `codebase-map-${run_id}.tar.gz`;
+            a.click();
+          });
+          $('result').appendChild(dl);
+        } else {
+          addEvent('error', `${data.status}: ${data.error || ''}`);
+        }
+        break;
+      }
+      if (data.type === 'text') addEvent('text', data.text);
+      else if (data.type === 'tool_use') addEvent('tool', `→ ${data.name}: ${data.summary}`);
+      else if (data.type === 'init') addEvent('init', `started on ${data.model}`);
+    }
+  } catch (err) {
+    addEvent('error', String(err));
+  } finally {
+    $('submitBtn').disabled = false;
+  }
+});
+</script>
+</body>
+</html>
