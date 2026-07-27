@@ -36,14 +36,17 @@ It runs the whole pipeline and pauses between steps. Or invoke a single skill on
 
 The skills above pause between phases so you can skip one. If you want the same pipeline
 callable from your own UI, a script, or CI, this repo also ships an agent service in
-[agents/codebase-cartographer](agents/codebase-cartographer). It runs the same skills
-through the [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk), runs every phase
-without pausing, and returns the generated docs in the response.
+[agents/codebase-cartographer](agents/codebase-cartographer). It runs on the
+[Gemini API](https://ai.google.dev/gemini-api/docs), runs every phase without pausing, and
+returns the generated docs in the response.
+
+Gemini has a genuinely free API tier, so this is the fastest way to try the service without
+a paid key. Get one at [aistudio.google.com](https://aistudio.google.com/apikey).
 
 ```bash
 pip install -e agents/codebase-cartographer
 export AGENT_API_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
-export ANTHROPIC_API_KEY=sk-ant-...
+export GEMINI_API_KEY=...
 cd agents/codebase-cartographer && uvicorn main:app --port 8002
 ```
 
@@ -59,19 +62,30 @@ curl -X POST localhost:8002/runs -H "X-API-Key: $AGENT_API_KEY" \
 text, and `GET /runs/{id}/artifact` returns them as a tarball. Runs take minutes, so nothing
 blocks.
 
+Gemini has no plugin/skill-loading mechanism the way Claude Code does, and no
+Read/Grep/Glob/Bash/Write tool set to reuse. The service reads each skill's `SKILL.md` and
+folds it into the system prompt instead of loading it as a live plugin, and it hands the
+model four hand-written functions in `agents/codebase-cartographer/tools.py`: `glob_files`,
+`read_file`, `grep`, `write_doc`. There is no Bash equivalent. The skill files themselves
+are not modified.
+
 ### Sandboxing
 
-The service clones a repository you gave it and runs a model with `Bash` inside that
-checkout, which is remote code execution by design. Two layers guard it, and you need both.
+The service still clones a repository you gave it, which is worth containing even without
+a shell in the loop.
 
-The agent turns on the SDK's bash sandbox in code, with network access off and no way for a
-command to opt back out. That holds even when you run the service straight from a terminal,
-so the protection does not depend on anyone reading this section. It confines bash on macOS
-and Linux; it does not confine the whole process.
+Dropping Bash removes the main risk a container would otherwise guard against: the model
+has no way to run a command, so there is nothing to sandbox at the process level the way a
+Claude-Code-based agent would need. What is left is `tools.py`'s own path checks —
+`read_file`, `grep`, and `write_doc` all resolve the caller's path and refuse anything that
+lands outside the checkout, including a symlink planted inside it that points out; `write_doc`
+additionally refuses any destination outside `docs/codebase-map/`. Those checks have their
+own test file (`test_tools.py`) precisely because they are now the whole boundary.
 
-The container is the other layer, and it is a deployment requirement rather than a
-suggestion. The included Dockerfile runs as a non-root user and installs git and the CLI it
-needs. Give it no host mounts, and limit egress to the git host you clone from.
+The container is still worth running. The included Dockerfile runs as a non-root user, and
+containing the git clone step and the process as a whole costs nothing and catches whatever
+a future change to `tools.py` might get wrong. Give it no host mounts, and limit egress to
+the git host you clone from.
 
 Local paths are refused unless `ALLOWED_REPO_ROOTS` names the directories the service may
 read. Left unset, only git URLs work, which is the right default in a container. Setting it
@@ -79,7 +93,8 @@ to `/` hands the agent your whole filesystem.
 
 The agent also treats everything in the mapped repository as untrusted data. If a file
 contains text addressed to the agent, it does not act on it; it quotes it back in
-`injection_notices` on the result.
+`injection_notices` on the result. Set `GEMINI_MODEL` to use something other than the
+default `gemini-2.5-flash`.
 
 The HTTP surface, streaming, and auth come from
 [agent-runtime](https://github.com/pronoy1004/agent-runtime). The skills are not modified:
