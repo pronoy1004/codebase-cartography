@@ -39,8 +39,8 @@ callable from your own UI, a script, or CI, this repo also ships an agent servic
 [agents/codebase-cartographer](agents/codebase-cartographer). It runs every phase without
 pausing and returns the generated docs in the response.
 
-The service runs on whatever LLM provider you already have a key for — Anthropic, OpenAI,
-Gemini, or anything else [litellm](https://docs.litellm.ai/) supports — via
+The service runs on whatever LLM provider you already have a key for (Anthropic, OpenAI,
+Gemini, or anything else [litellm](https://docs.litellm.ai/) supports) via
 [agent-runtime](https://github.com/pronoy1004/agent-runtime). Gemini has a genuinely free
 API tier, so it's the fastest way to try the service without a paid key:
 [aistudio.google.com](https://aistudio.google.com/apikey).
@@ -88,7 +88,7 @@ a shell in the loop.
 
 Dropping Bash removes the main risk a container would otherwise guard against: the model
 has no way to run a command, so there is nothing to sandbox at the process level the way a
-Claude-Code-based agent would need. What is left is `tools.py`'s own path checks —
+Claude-Code-based agent would need. What is left is `tools.py`'s own path checks:
 `read_file`, `grep`, and `write_doc` all resolve the caller's path and refuse anything that
 lands outside the checkout, including a symlink planted inside it that points out; `write_doc`
 additionally refuses any destination outside `docs/codebase-map/`. Those checks have their
